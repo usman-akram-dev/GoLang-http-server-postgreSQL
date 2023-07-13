@@ -21,8 +21,8 @@ type apiConfig struct {
 func main() {
 	godotenv.Load()
 
-	portString := os.Getenv("PORT")
-	if portString == "" {
+	port := os.Getenv("PORT")
+	if port == "" {
 		log.Fatal("PORT is not found in the environment")
 	}
 
@@ -53,14 +53,15 @@ func main() {
 
 	v1Router := chi.NewRouter()
 	v1Router.Post("/users", apiCfg.handlerUsersCreate)
+	v1Router.Get("/users", apiCfg.handlerUsersGet)
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/err", handlerErr)
 	router.Mount("/v1", v1Router)
 
 	srv := &http.Server{
+		Addr:    ":" + port,
 		Handler: router,
-		Addr:    ":" + portString,
 	}
-	log.Printf("Server starting on port %v", portString)
+	log.Printf("Server starting on port %v", port)
 	log.Fatal(srv.ListenAndServe())
 }
